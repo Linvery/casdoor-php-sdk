@@ -21,7 +21,11 @@
     "require": {
         "php": ">=7.1.0",
         "guzzlehttp/guzzle": "^7.3",
-        "league/oauth2-client": "^2.6"
+        "league/oauth2-client": "^2.6",
+        "phpunit/phpunit": "~7.0|~8.0|~9.0",
+        "php-coveralls/php-coveralls": "^2.1",
+        "phpstan/phpstan": "^1.2",
+        "mockery/mockery": "^1.2"
     },
     "autoload": {
         "psr-4": {
@@ -36,5 +40,10 @@
             "Casdoor\\Tests\\": "tests/"
         }
     },
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "scripts": {
+        "test": "./vendor/bin/phpunit -v --testsuite test",
+        "benchmark": "./vendor/bin/phpunit -v --no-coverage --testsuite benchmark",
+        "analyse": "./vendor/bin/phpstan analyse"
+    }
 }

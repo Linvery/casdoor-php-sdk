@@ -1,6 +1,46 @@
 name: Release
 on: [push, pull_request]
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [7.1, 7.2, 7.3, 7.4, 8.0, 8.1]
+        stability: [prefer-lowest, prefer-stable]
+
+    name: Test PHP ${{ matrix.php }} - ${{ matrix.stability }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer:v2
+          coverage: xdebug
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Install dependencies
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Run phpstan analyse
+        run: composer analyse
+
+      - name: Run test suite
+        run: composer test
+
+      - name: Run Coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GH_TOKEN }}
+          COVERALLS_PARALLEL: true
+          COVERALLS_FLAG_NAME: ${{ runner.os }} - ${{ matrix.php }} - ${{ matrix.stability }}
+        run: ./vendor/bin/php-coveralls --coverage_clover=build/logs/clover.xml -v
   release:
     name: Release
     runs-on: ubuntu-latest
